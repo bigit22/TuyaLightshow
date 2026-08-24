@@ -13,7 +13,6 @@ from tuyalight.engine import LightshowEngine
 def main(ctx: click.Context) -> None:
     """TuyaLight CLI."""
     if ctx.invoked_subcommand is None:
-        # Если запустили .exe просто кликом — открываем GUI
         from tuyalight.gui import run_gui
 
         run_gui()
@@ -66,13 +65,27 @@ def startup(enable: bool, disable: bool) -> None:
         return
 
     if enable:
-        pythonw = Path(sys.executable).parent / "pythonw.exe"
-        project_dir = Path.cwd()
+        is_frozen = getattr(sys, "frozen", False)
+        exe_path = Path(sys.executable).resolve()
+        project_dir = Path.cwd().resolve()
         config_path = project_dir / "config.toml"
 
-        vbs_content = f'''Set WshShell = CreateObject("WScript.Shell")
+        if is_frozen:
+            # Запуск из собранного .exe
+            vbs_content = f'''Set WshShell = CreateObject("WScript.Shell")
+WshShell.CurrentDirectory = "{project_dir}"
+WshShell.Run """{exe_path}"" run --background -c ""{config_path}""", 0, False
+'''
+        else:
+            # Запуск из исходников Python
+            pythonw = exe_path.parent / "pythonw.exe"
+            if not pythonw.exists():
+                pythonw = exe_path
+
+            vbs_content = f'''Set WshShell = CreateObject("WScript.Shell")
 WshShell.CurrentDirectory = "{project_dir}"
 WshShell.Run """{pythonw}"" -m tuyalight run --background -c ""{config_path}""", 0, False
 '''
+
         vbs_path.write_text(vbs_content, encoding="utf-8")
         click.echo(f"Added to Windows Startup: {vbs_path}")
