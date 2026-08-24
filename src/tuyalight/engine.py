@@ -82,12 +82,22 @@ class LightshowEngine:
             time.sleep(sleep_time)
 
     def run(self, background: bool = False) -> None:
-        try:
-            speaker = sc.default_speaker()
-            mic = sc.get_microphone(speaker.id, include_loopback=True)
-        except Exception as e:
+        speaker = None
+        mic = None
+
+        # Цикл ожидания готовности звуковой службы Windows (до 15 секунд при старте ПК)
+        for _ in range(10):
+            try:
+                speaker = sc.default_speaker()
+                mic = sc.get_microphone(speaker.id, include_loopback=True)
+                if speaker is not None and mic is not None:
+                    break
+            except Exception:
+                time.sleep(1.5)
+
+        if speaker is None or mic is None:
             if not background:
-                sys.stdout.write(f"Audio error: {e}\n")
+                sys.stdout.write("Audio error: Could not capture default speaker/microphone.\n")
             return
 
         if not background:

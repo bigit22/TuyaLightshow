@@ -67,24 +67,21 @@ def startup(enable: bool, disable: bool) -> None:
     if enable:
         is_frozen = getattr(sys, "frozen", False)
         exe_path = Path(sys.executable).resolve()
-        project_dir = Path.cwd().resolve()
-        config_path = project_dir / "config.toml"
 
         if is_frozen:
-            # Запуск из собранного .exe
-            vbs_content = f'''Set WshShell = CreateObject("WScript.Shell")
-WshShell.CurrentDirectory = "{project_dir}"
-WshShell.Run """{exe_path}"" run --background -c ""{config_path}""", 0, False
-'''
+            base_dir = exe_path.parent
+            config_path = base_dir / "config.toml"
+            cmd_str = f'"""{exe_path}"" run --background -c ""{config_path}"""'
         else:
-            # Запуск из исходников Python
+            base_dir = Path.cwd().resolve()
+            config_path = base_dir / "config.toml"
             pythonw = exe_path.parent / "pythonw.exe"
-            if not pythonw.exists():
-                pythonw = exe_path
+            py_exec = pythonw if pythonw.exists() else exe_path
+            cmd_str = f'"""{py_exec}"" -m tuyalight run --background -c ""{config_path}"""'
 
-            vbs_content = f'''Set WshShell = CreateObject("WScript.Shell")
-WshShell.CurrentDirectory = "{project_dir}"
-WshShell.Run """{pythonw}"" -m tuyalight run --background -c ""{config_path}""", 0, False
+        vbs_content = f'''Set WshShell = CreateObject("WScript.Shell")
+WshShell.CurrentDirectory = "{base_dir}"
+WshShell.Run {cmd_str}, 0, False
 '''
 
         vbs_path.write_text(vbs_content, encoding="utf-8")
