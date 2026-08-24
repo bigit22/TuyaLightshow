@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tuyalight"
+version = "0.1.0"
+description = "Real-time bass-reactive lightshow for Tuya WiFi LED strips"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "tinytuya>=1.13.0",
+    "soundcard>=0.4.3",
+    "numpy>=1.24.0",
+    "click>=8.1.0",
+    "pydantic>=2.5.0",
+    "tomli>=2.0.0; python_version < '3.11'",
+]
+
+[project.scripts]
+tuyalight = "tuyalight.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true
