@@ -1,0 +1,21 @@
+[device]
+device_id = "x"
+ip = "x"
+local_key = "x"
+version = 3.5
+
+[audio]
+sample_rate = 44100
+buffer_size = 512
+bass_freq_min = 20
+bass_freq_max = 140
+
+[effect]
+gamma = 3.6
+low_cutoff = 0.08
+bass_dominance = 0.3
+min_peak_floor = 0.014
+smoothing = 0.25
+dynamic_color = true
+hue_low = 40
+hue_high = 280

@@ -3,14 +3,20 @@ import sys
 from pathlib import Path
 
 import click
+
 from tuyalight.config import AppConfig
 from tuyalight.engine import LightshowEngine
 
 
-@click.group()
-def main() -> None:
+@click.group(invoke_without_command=True)
+@click.pass_context
+def main(ctx: click.Context) -> None:
     """TuyaLight CLI."""
-    pass
+    if ctx.invoked_subcommand is None:
+        # Если запустили .exe просто кликом — открываем GUI
+        from tuyalight.gui import run_gui
+
+        run_gui()
 
 
 @main.command()
@@ -21,6 +27,15 @@ def run(config: str, background: bool) -> None:
     cfg = AppConfig.load(config)
     engine = LightshowEngine(cfg)
     engine.run(background=background)
+
+
+@main.command()
+@click.option("-c", "--config", default="config.toml", help="Path to config.toml")
+def gui(config: str) -> None:
+    """Launch Liquid Glass GUI."""
+    from tuyalight.gui import run_gui
+
+    run_gui(config_path=config)
 
 
 @main.command()
@@ -51,7 +66,6 @@ def startup(enable: bool, disable: bool) -> None:
         return
 
     if enable:
-        # Resolve pythonw.exe (windowless python) and absolute project path
         pythonw = Path(sys.executable).parent / "pythonw.exe"
         project_dir = Path.cwd()
         config_path = project_dir / "config.toml"

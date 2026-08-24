@@ -32,6 +32,7 @@ class EffectConfig(BaseModel):
     dynamic_color: bool = True
     hue_low: int = 40
     hue_high: int = 280
+    target_fps: int = 30  # Лимит отправки пакетов
 
 
 class AppConfig(BaseSettings):
