@@ -18,14 +18,16 @@ from tuyalight.gui.theme import (
 class _JumpSlider(QSlider):
     """Handle jumps exactly to the clicked position."""
 
-    def mousePressEvent(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.MouseButton.LeftButton and self.width() > 0:
+    def mousePressEvent(self, event: QMouseEvent | None) -> None:
+        if event is not None and event.button() == Qt.MouseButton.LeftButton and self.width() > 0:
             ratio = event.position().x() / self.width()
             ratio = max(0.0, min(1.0, ratio))
             val = self.minimum() + ratio * (self.maximum() - self.minimum())
             self.setValue(round(val))
             event.accept()
-        super().mousePressEvent(event)
+
+        if event is not None:
+            super().mousePressEvent(event)
 
 
 class GlassSlider(QWidget):

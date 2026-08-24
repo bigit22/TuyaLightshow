@@ -2,18 +2,19 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Any
 
-try:
+if sys.version_info >= (3, 11):
     import tomllib
-except ModuleNotFoundError:
+else:
     import tomli as tomllib
 
 try:
     import tomli_w
 except ModuleNotFoundError:
-    tomli_w = None
+    tomli_w = None  # type: ignore[assignment]
 
 
 DEFAULT_CONFIG: dict[str, Any] = {

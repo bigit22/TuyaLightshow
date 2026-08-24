@@ -34,4 +34,10 @@ tuyalight = "tuyalight.cli:main"
 line-length = 100
 
 [tool.ruff.lint]
-ignore = ["BLE001", "S110"]
+ignore = ["BLE001", "S110", "PYI034"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_configs = true
+follow_imports = "silent"

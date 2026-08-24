@@ -20,11 +20,13 @@ class EngineRunner:
 
     @property
     def is_running(self) -> bool:
-        return self._process is not None and self._process.poll() is None
+        proc = self._process
+        return proc is not None and proc.poll() is None
 
     @property
     def pid(self) -> int | None:
-        return self._process.pid if self.is_running else None
+        proc = self._process
+        return proc.pid if proc is not None and proc.poll() is None else None
 
     def start(self) -> None:
         if self.is_running:

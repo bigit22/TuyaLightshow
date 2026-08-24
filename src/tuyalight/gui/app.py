@@ -11,7 +11,10 @@ from tuyalight.gui.window import MainWindow
 
 
 def run_gui(config_path: str = "config.toml") -> None:
-    app = QApplication.instance() or QApplication(sys.argv)
+    app = QApplication.instance()
+    if not isinstance(app, QApplication):
+        app = QApplication(sys.argv)
+
     app.setStyle("Fusion")
     app.setFont(default_font())
 

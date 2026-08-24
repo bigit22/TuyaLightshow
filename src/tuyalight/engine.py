@@ -32,20 +32,20 @@ class LightshowEngine:
         }
 
     def _network_worker(self, led: TuyaLED, background: bool) -> None:
-        last_v, last_h = -1, -1
+        last_v: int = -1
+        last_h: int = -1
         target_frame_time = 1.0 / self.cfg.effect.target_fps
-        led_frame_times = []
+        led_frame_times: list[float] = []
         last_stat_time = time.perf_counter()
         last_send_time = time.perf_counter()
 
         while self.shared_state["running"]:
             t_start = time.perf_counter()
 
-            v = self.shared_state["target_v"]
-            h = self.shared_state["target_h"]
+            v = int(self.shared_state["target_v"])
+            h = int(self.shared_state["target_h"])
             now = time.perf_counter()
 
-            # Условие отправки: есть изменение ИЛИ прошло >0.3 сек (Keepalive в тишине)
             force_keepalive = (now - last_send_time) > 0.3
             need_send = (
                 abs(v - last_v) >= 8
@@ -63,14 +63,11 @@ class LightshowEngine:
                     last_v, last_h = v, h
                     last_send_time = time.perf_counter()
 
-                    # ЧЕСТНЫЙ СЧЁТЧИК: считаем кадр ТОЛЬКО если сокет реально подтвердил отправку
                     led_frame_times.append(last_send_time)
                     led_frame_times = [t for t in led_frame_times if last_send_time - t <= 1.0]
                 else:
-                    # Сокет отвалился — делаем небольшую паузу на переподключение
                     time.sleep(0.05)
 
-            # Отправляем честную телеметрию в GUI
             if background and (now - last_stat_time >= 0.5):
                 last_stat_time = now
                 stat_data = {
@@ -80,7 +77,6 @@ class LightshowEngine:
                 sys.stdout.write(json.dumps(stat_data) + "\n")
                 sys.stdout.flush()
 
-            # Точный лимитер FPS
             elapsed = time.perf_counter() - t_start
             sleep_time = max(0.001, target_frame_time - elapsed)
             time.sleep(sleep_time)
